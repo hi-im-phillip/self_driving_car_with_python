@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 screen_height = 800
-screen_height = 610
+screen_height = 640
 
 
 def pre_process_frame(frame):
@@ -11,14 +11,22 @@ def pre_process_frame(frame):
     blur the given image and apply Canny effect
     :return: Return it with made changes
     """
-    processed_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    processed_frame = cv2.Canny(processed_frame, 200, 350)
-    processed_frame = cv2.GaussianBlur(processed_frame, (5, 5), 0)
-    processed_frame = region_of_interest(frame=processed_frame)
-    return processed_frame
+    vertices = np.array([[10, 490], [10, 370], [200, 280], [600, 280], [800, 370], [800, 490]], np.int32)
+    gray_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)  # gray image
+    canny_effect_frame = cv2.Canny(gray_frame, 100, 200)  # applied canny effect
+    blur_frame = cv2.GaussianBlur(canny_effect_frame, (5, 5), 0)
+    frame_with_roi = region_of_interest(blur_frame, [vertices])
+    lines = cv2.HoughLinesP(frame_with_roi,
+                            rho=1,
+                            theta=np.pi/180,
+                            threshold=180,
+                            lines=np.array([]),
+                            minLineLength=30,
+                            maxLineGap=15)
+    return frame_with_roi, lines
 
 
-def region_of_interest(frame):
+def region_of_interest(frame, vertices):
     """
     :param
     Takes a image and return enclosed region of field of view,
@@ -30,7 +38,8 @@ def region_of_interest(frame):
     region of interest traced by the polygonal contour of the mask
     """
     mask = np.zeros_like(frame)
-    vertices = np.array([[[0, 600], [0, 400], [200, 320], [600, 320], [screen_height, 400], [screen_height, 600]]]) #np.array([[[50, 475], [0, 600], [0, 350], [200, 300], [600, 300], [800, 350], [800, 600], [750, 475]]]) # np.array([[(100, height), (700, height), (400, 100)]])
     cv2.fillPoly(mask, vertices, 255)
     masked_frame = cv2.bitwise_and(frame, mask)
     return masked_frame
+
+
