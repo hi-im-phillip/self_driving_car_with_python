@@ -80,18 +80,27 @@ def draw_closest_line(frame, lines):
 
         for line in lines:
             for x1, y1, x2, y2 in line:
+                if x1 == x2:
+                    continue
                 slope = (y2 - y1) / (x2 - x1)
                 if math.fabs(slope) < 0.05:
                     continue
-                if slope <= 0:  # negative slope is left line
+                if slope < 0:  # negative slope is left line
                     left_line_x.extend([x1, x2])
                     left_line_y.extend([y1, y2])
                 else:
                     right_line_x.extend([x1, x2])
                     right_line_y.extend([y1, y2])
 
-        min_y = 300 #int(frame.shape[0] * (3/5))
-        max_y = int(frame.shape[0])
+        # min_y = 300 #int(frame.shape[0] * (3/5))
+        # max_y = int(frame.shape[0])
+
+        ys = []
+        for line in lines:
+            for xy in line:
+                ys += [xy[1], xy[3]]
+        max_y = 600
+        min_y = min(ys)
 
         poly_left = np.poly1d(np.polyfit(left_line_y, left_line_x, deg=1))
         left_x_start = int(poly_left(max_y))
@@ -100,13 +109,21 @@ def draw_closest_line(frame, lines):
         poly_right = np.poly1d(np.polyfit(right_line_y, right_line_x, deg=1))
         right_x_start = int(poly_right(max_y))
         right_x_end = int(poly_right(min_y))
+        # print("left")
+        # print(left_x_start - left_x_end)
+        # print("right")
+        # print(right_x_start - right_x_end)
+        # print("\n")
+        left = left_x_start - left_x_end
+        right = right_x_start - right_x_end
 
-        frame_with_closest_line = draw_line(frame, [[
-            [left_x_start, max_y, left_x_end, min_y],
-            [right_x_start, max_y, right_x_end, min_y],
-        ]], thickness=5, )
+        # frame_with_closest_line = draw_line(frame, [[
+        #     [left_x_start, max_y, left_x_end, min_y],
+        #     [right_x_start, max_y, right_x_end, min_y],
+        # ]], thickness=5, )
 
-        return frame_with_closest_line
+        return [left_x_start, max_y, left_x_end, min_y], [right_x_start, max_y, right_x_end, min_y]#, left, right
+        # return frame_with_closest_line
     except Exception as e:
         print(str(e))
 
