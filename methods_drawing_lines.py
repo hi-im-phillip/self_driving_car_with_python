@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import math
+import logging
 
 
 def display_lines(frame, lines):
@@ -70,7 +71,7 @@ def draw_line(frame, lines, color=[255, 0, 0], thickness=3):
     return frame
 
 
-def draw_closest_line(frame, lines):
+def draw_closest_line(lines):
 
     try:
         left_line_x = []
@@ -92,40 +93,133 @@ def draw_closest_line(frame, lines):
                     right_line_x.extend([x1, x2])
                     right_line_y.extend([y1, y2])
 
-        # min_y = 300 #int(frame.shape[0] * (3/5))
-        # max_y = int(frame.shape[0])
+        # min_y_left = 300 #int(frame.shape[0] * (3/5))
+        # max_y_left = int(frame.shape[0])
 
+        # Definition of the new line length
         ys = []
         for line in lines:
             for xy in line:
                 ys += [xy[1], xy[3]]
-        max_y = 600
-        min_y = min(ys)
+        max_y_left = 600
+        min_y_left = min(ys)
 
-        poly_left = np.poly1d(np.polyfit(left_line_y, left_line_x, deg=1))
-        left_x_start = int(poly_left(max_y))
-        left_x_end = int(poly_left(min_y))
+        max_y_right = max_y_left
+        min_y_right = min_y_left
+        #  if one of lines is empty, set that lane to 0
+        if len(left_line_x) == 0 and len(left_line_y) == 0:
+            left_x_start = 0
+            left_x_end = 0
+            max_y_left = 0
+            min_y_left = 0
+        else:
+            poly_left = np.poly1d(np.polyfit(left_line_y, left_line_x, deg=1))
+            left_x_start = int(poly_left(max_y_left))
+            left_x_end = int(poly_left(min_y_left))
 
-        poly_right = np.poly1d(np.polyfit(right_line_y, right_line_x, deg=1))
-        right_x_start = int(poly_right(max_y))
-        right_x_end = int(poly_right(min_y))
+        if len(right_line_y) == 0 and len(right_line_x) == 0:
+            right_x_start = 0
+            right_x_end = 0
+            max_y_right = 0
+            min_y_right = 0
+        else:
+            poly_right = np.poly1d(np.polyfit(right_line_y, right_line_x, deg=1))
+            right_x_start = int(poly_right(max_y_right))
+            right_x_end = int(poly_right(min_y_right))
+
+        # TODO Logic steering
         # print("left")
-        # print(left_x_start - left_x_end)
+        # print(left_x_end)
         # print("right")
         # print(right_x_start - right_x_end)
         # print("\n")
-        left = left_x_start - left_x_end
-        right = right_x_start - right_x_end
-
+        # left = left_x_start - left_x_end
+        # right = right_x_start - right_x_end
+        # print(int(mean(right_line_x)))
+        # print(int(mean(left_line_x)))
+        #print(slope)
         # frame_with_closest_line = draw_line(frame, [[
-        #     [left_x_start, max_y, left_x_end, min_y],
-        #     [right_x_start, max_y, right_x_end, min_y],
+        #     [left_x_start, max_y_left, left_x_end, min_y_left],
+        #     [right_x_start, max_y_left, right_x_end, min_y_left],
         # ]], thickness=5, )
 
-        return [left_x_start, max_y, left_x_end, min_y], [right_x_start, max_y, right_x_end, min_y]#, left, right
+        return [left_x_start, max_y_left, left_x_end, min_y_left], [right_x_start, max_y_right, right_x_end, min_y_right]
         # return frame_with_closest_line
     except Exception as e:
         print(str(e))
+
+
+def make_steering_angle(frame, l1, l2):
+    height, width, _ = frame.shape
+
+    if l1 == [0, 0, 0, 0]:
+        x1, _, x2, _ = l2
+        x_offset = x2 - x1
+    elif l2 == [0, 0, 0, 0]:
+        x1, _, x2, _ = l1
+        x_offset = x2 - x1
+    else:
+        left_x2 = l1[0]
+        right_x2 = l2[0]
+        mid_offset_percent = 0.02
+        mid = int(width / 2 * (1 + mid_offset_percent))
+        x_offset = (left_x2 + right_x2) / 2 - mid
+
+    y_offset = int(height / 2)
+
+    angle_to_mid_radian = math.atan(x_offset / y_offset)
+    angle_to_mid_deg = int(angle_to_mid_radian * 180.0 / math.pi)
+    steering_angle = angle_to_mid_deg + 90
+
+    return steering_angle
+
+
+def make_steering_angle_default(frame, lines):
+    height, width, _ = frame.shape
+
+    if len(lines) == 0:
+        logging.info("No line in lines")
+        return -90
+
+    if len(lines) == 1:
+        logging.info("Only 1 line detected")
+        x1, _, x2, _ = lines[0][0]
+        x_offset = x2 - x1
+    else:
+        _, _, left_x2, _ = lines[0][0]
+        _, _, right_x2, _ = lines[1][0]
+        mid_offset_percent = 0.02
+        mid = int(width / 2 * (1 + mid_offset_percent))
+        x_offset = (left_x2 + right_x2) / 2 - mid
+
+    y_offset = int(height / 2)
+
+    angle_to_mid_radian = math.atan(x_offset / y_offset)
+    angle_to_mid_deg = int(angle_to_mid_radian * 180.0 / math.pi)
+    steering_angle = angle_to_mid_deg + 90
+
+    return steering_angle
+
+
+def draw_heading_line(frame, steering_angle, color=[0, 0, 255], line_width=5):
+    height, width, _ = frame.shape
+    steering_angle_radian = steering_angle / 180 * math.pi
+    x1 = int(width / 2)
+    y1 = height
+    x2 = int(x1 - height / 2 / math.tan(steering_angle_radian))
+    y2 = int(height / 2)
+
+    return x1, y1, x2, y2
+
+
+def stabilize_steering_angle(current_angle, new_angle, max_angle_deviation=5):
+    angle_deviation = new_angle - current_angle
+    if abs(angle_deviation) > max_angle_deviation:
+        stabilized_angle = int(current_angle + max_angle_deviation * angle_deviation / abs(angle_deviation))
+    else:
+        stabilized_angle = new_angle
+
+    return stabilized_angle
 
 
 def draw_line_old(img, lines, color=[255, 0, 0], thickness=3):

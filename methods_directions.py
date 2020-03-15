@@ -16,16 +16,28 @@ def go_left():
     PressKey(A)
     ReleaseKey(W)
     ReleaseKey(D)
-    # time.sleep(t_time)
-    # ReleaseKey(A)
+
+
+def go_lil_left():
+    PressKey(A)
+    ReleaseKey(W)
+    ReleaseKey(D)
+    time.sleep(wait_time)
+    ReleaseKey(A)
+
+
+def go_lil_right():
+    PressKey(D)
+    ReleaseKey(W)
+    ReleaseKey(A)
+    time.sleep(wait_time)
+    ReleaseKey(D)
 
 
 def go_right():
     PressKey(D)
     ReleaseKey(W)
     ReleaseKey(A)
-    # time.sleep(t_time)
-    # ReleaseKey(D)
 
 
 def slow_down():
