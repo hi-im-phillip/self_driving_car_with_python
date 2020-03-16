@@ -8,7 +8,7 @@ def go_straight():
     ReleaseKey(A)
     ReleaseKey(D)
     PressKey(W)
-    time.sleep(wait_time)
+    time.sleep(0.09)
     ReleaseKey(W)
 
 
@@ -16,6 +16,8 @@ def go_left():
     PressKey(A)
     ReleaseKey(W)
     ReleaseKey(D)
+    time.sleep(0.2)
+    ReleaseKey(A)
 
 
 def go_lil_left():
@@ -38,11 +40,19 @@ def go_right():
     PressKey(D)
     ReleaseKey(W)
     ReleaseKey(A)
+    time.sleep(0.2)
+    ReleaseKey(D)
 
 
 def slow_down():
     ReleaseKey(W)
     time.sleep(wait_time)
+
+
+def lil_gas():
+    PressKey(W)
+    time.sleep(0.01)
+    ReleaseKey(W)
 
 
 def reverse():

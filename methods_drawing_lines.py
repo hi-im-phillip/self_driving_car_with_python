@@ -161,8 +161,8 @@ def make_steering_angle(frame, l1, l2):
     else:
         left_x2 = l1[0]
         right_x2 = l2[0]
-        mid_offset_percent = 0.02
-        mid = int(width / 2 * (1 + mid_offset_percent))
+        # mid_offset_percent = 0.02
+        mid = int(width / 2)  # * (1 + mid_offset_percent))
         x_offset = (left_x2 + right_x2) / 2 - mid
 
     y_offset = int(height / 2)

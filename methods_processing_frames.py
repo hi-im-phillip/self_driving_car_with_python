@@ -17,7 +17,7 @@ def pre_process_frame(frame):
     # global l1, l2, t1, t2
     steering_angle = 90
     original_frame = frame
-    vertices = np.array([[10, 440], [10, 320], [200, 280], [600, 280], [800, 320], [800, 440]], np.int32)
+    vertices = np.array([[5, 420], [110, 340], [300, 270], [500, 270], [690, 340], [800, 420]], np.int32)
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)  # gray image
     canny_effect_frame = cv2.Canny(gray_frame, 100, 200)  # applied canny effect
     blur_frame = cv2.GaussianBlur(canny_effect_frame, (5, 5), 0)
@@ -27,7 +27,7 @@ def pre_process_frame(frame):
                             theta=np.pi / 180,
                             threshold=180,
                             lines=np.array([]),
-                            minLineLength=30,
+                            minLineLength=70,
                             maxLineGap=15)
     try:
         l1, l2 = draw_closest_line(lines)  # , left, right
