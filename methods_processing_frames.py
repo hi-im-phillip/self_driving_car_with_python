@@ -3,6 +3,7 @@ import numpy as np
 from self_driving_car_with_python.methods_drawing_lines import draw_closest_line, make_steering_angle, \
     draw_heading_line, make_steering_angle_default
 import logging
+from statistics import mean
 
 screen_height = 800
 screen_height = 640
@@ -14,25 +15,25 @@ def pre_process_frame(frame):
     blur the given image and apply Canny effect
     :return: Return it with made changes
     """
-    # global l1, l2, t1, t2
     steering_angle = 90
     original_frame = frame
-    vertices = np.array([[5, 420], [110, 340], [300, 270], [500, 270], [690, 340], [800, 420]], np.int32)
+    vertices = np.array([[370, 360], [200, 465], [5, 465], [100, 350], [350, 260], [450, 260], [700, 350], [800, 465], [600, 465], [430, 360]], np.int32)  # last two sets of vertices added because of sings on road need to be cropped
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)  # gray image
     canny_effect_frame = cv2.Canny(gray_frame, 100, 200)  # applied canny effect
     blur_frame = cv2.GaussianBlur(canny_effect_frame, (5, 5), 0)
     frame_with_roi = region_of_interest(blur_frame, [vertices])
     lines = cv2.HoughLinesP(frame_with_roi,
-                            rho=1,
+                            rho=2,
                             theta=np.pi / 180,
-                            threshold=180,
+                            threshold=130,
                             lines=np.array([]),
-                            minLineLength=70,
-                            maxLineGap=15)
+                            minLineLength=20,
+                            maxLineGap=10)
     try:
         l1, l2 = draw_closest_line(lines)  # , left, right
         steering_angle = make_steering_angle(frame, l1, l2)
         x1, y1, x2, y2 = draw_heading_line(frame, steering_angle)
+        #print(mean(l1[0::1]), mean(l2[0::1]))
 
         cv2.line(original_frame, (l1[0], l1[1]), (l1[2], l1[3]), [0, 250, 0], 30)
         cv2.line(original_frame, (l2[0], l2[1]), (l2[2], l2[3]), [0, 250, 0], 30)
@@ -50,6 +51,7 @@ def pre_process_frame(frame):
                 try:
                     # t1, t2 = draw_closest_line(lines)
                     cv2.line(frame_with_roi, (x1, y1), (x2, y2), [250, 0, 0], 3)
+                    # print(mean(l1[0::1]), mean(l2[0::1]))
                     # steering_angle = make_steering_angle_default(frame, lines)
                 except Exception as e:
                     logging.error("Couldn't draw lines with given input")
@@ -57,15 +59,8 @@ def pre_process_frame(frame):
     except Exception as e:
         logging.error("Didn't get lines or line")
         print(str(e))
-    # TODO kako ne bi puko ako l1 i l2 budi prazni pa daj default lajnu kako bi usporedivali za steering logic kasnije
-    # if len(l1) == 0 and len(l2) == 0:
-    #     need_this_1 = t1
-    #     need_this_2 = t2
-    # else:
-    # need_this_1 = l1
-    # need_this_2 = l2
 
-    return frame_with_roi, original_frame, steering_angle  # , need_this_1, need_this_2
+    return frame_with_roi, original_frame, steering_angle, canny_effect_frame, l1, l2
 
 
 def region_of_interest(frame, vertices):
