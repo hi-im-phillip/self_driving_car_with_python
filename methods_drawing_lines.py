@@ -127,24 +127,7 @@ def draw_closest_line(lines):
             right_x_start = int(poly_right(max_y_right))
             right_x_end = int(poly_right(min_y_right))
 
-        # TODO Logic steering
-        # print("left")
-        # print(left_x_end)
-        # print("right")
-        # print(right_x_start - right_x_end)
-        # print("\n")
-        # left = left_x_start - left_x_end
-        # right = right_x_start - right_x_end
-        # print(int(mean(right_line_x)))
-        # print(int(mean(left_line_x)))
-        #print(slope)
-        # frame_with_closest_line = draw_line(frame, [[
-        #     [left_x_start, max_y_left, left_x_end, min_y_left],
-        #     [right_x_start, max_y_left, right_x_end, min_y_left],
-        # ]], thickness=5, )
-
         return [left_x_start, max_y_left, left_x_end, min_y_left], [right_x_start, max_y_right, right_x_end, min_y_right]
-        # return frame_with_closest_line
     except Exception as e:
         print(str(e))
 

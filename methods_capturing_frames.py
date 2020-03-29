@@ -1,7 +1,7 @@
 from self_driving_car_with_python.grab_screen import grab_screen
 
-screen_height = 800
-screen_width = 640
+screen_height = 1024
+screen_width = 768
 
 
 def take_frame():

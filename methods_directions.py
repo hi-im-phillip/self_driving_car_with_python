@@ -3,6 +3,34 @@ import time
 import logging
 from statistics import mean
 
+t_time = 0.09
+
+
+def straight():
+    PressKey(W)
+    ReleaseKey(A)
+    ReleaseKey(D)
+
+
+def left():
+    PressKey(W)
+    PressKey(A)
+    ReleaseKey(W)
+    ReleaseKey(D)
+    #ReleaseKey(A)
+    time.sleep(t_time)
+    ReleaseKey(A)
+
+
+def right():
+    PressKey(W)
+    PressKey(D)
+    ReleaseKey(W)
+    ReleaseKey(A)
+    #ReleaseKey(D)
+    time.sleep(t_time)
+    ReleaseKey(D)
+
 
 def go_straight():
     ReleaseKey(A)

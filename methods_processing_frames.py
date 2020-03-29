@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from self_driving_car_with_python.methods_drawing_lines import draw_closest_line, make_steering_angle, \
-    draw_heading_line, make_steering_angle_default
+    draw_heading_line
 import logging
 from statistics import mean
 
@@ -15,9 +15,11 @@ def pre_process_frame(frame):
     blur the given image and apply Canny effect
     :return: Return it with made changes
     """
+    vertices_800x600 = np.array([[370, 360], [200, 465], [5, 465], [100, 350], [350, 260], [450, 260], [700, 350], [800, 465], [600, 465], [430, 360]], np.int32)
+    vertices_1024x768 = np.array([[450, 460], [200, 565], [5, 565], [100, 450], [450, 260], [550, 260], [924, 450], [1024, 565], [800, 565], [550, 460]], np.int32)
     steering_angle = 90
     original_frame = frame
-    vertices = np.array([[370, 360], [200, 465], [5, 465], [100, 350], [350, 260], [450, 260], [700, 350], [800, 465], [600, 465], [430, 360]], np.int32)  # last two sets of vertices added because of sings on road need to be cropped
+    vertices = vertices_1024x768  # last two sets of vertices added because of sings on road need to be cropped
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)  # gray image
     canny_effect_frame = cv2.Canny(gray_frame, 100, 200)  # applied canny effect
     blur_frame = cv2.GaussianBlur(canny_effect_frame, (5, 5), 0)
@@ -60,7 +62,7 @@ def pre_process_frame(frame):
         logging.error("Didn't get lines or line")
         print(str(e))
 
-    return frame_with_roi, original_frame, steering_angle, canny_effect_frame, l1, l2
+    return frame_with_roi, original_frame, steering_angle, l1, l2
 
 
 def region_of_interest(frame, vertices):
@@ -78,3 +80,16 @@ def region_of_interest(frame, vertices):
     cv2.fillPoly(mask, vertices, 255)
     masked_frame = cv2.bitwise_and(frame, mask)
     return masked_frame
+
+
+def modify_frame_160x120gray(frame):
+    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    resized_frame = cv2.resize(gray_frame, (160, 120))
+    return resized_frame
+
+
+def modify_frame_480x270gray(frame):
+    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    resized_frame = cv2.resize(gray_frame, (480, 270))
+    return resized_frame
+
