@@ -33,9 +33,9 @@ def right():
 
 
 def go_straight():
+    PressKey(W)
     ReleaseKey(A)
     ReleaseKey(D)
-    PressKey(W)
     time.sleep(0.03)
     ReleaseKey(W)
 
@@ -160,3 +160,53 @@ def steering_logic(steering_angle, l1, l2):
         go_straight()
         print("going straight")
         print(steering_angle)
+
+
+def reverse():
+    PressKey(S)
+    time.sleep(0.03)
+    ReleaseKey(A)
+    ReleaseKey(W)
+    ReleaseKey(D)
+
+
+def forward_left():
+    PressKey(A)
+    PressKey(W)
+    time.sleep(0.03)
+    ReleaseKey(D)
+    ReleaseKey(S)
+    ReleaseKey(W)
+
+
+def forward_right():
+    PressKey(D)
+    PressKey(W)
+    time.sleep(0.03)
+    ReleaseKey(A)
+    ReleaseKey(S)
+    ReleaseKey(W)
+
+
+def reverse_left():
+    PressKey(S)
+    PressKey(A)
+    time.sleep(0.03)
+    ReleaseKey(W)
+    ReleaseKey(D)
+
+
+def reverse_right():
+    PressKey(S)
+    PressKey(D)
+    time.sleep(0.03)
+    ReleaseKey(W)
+    ReleaseKey(A)
+
+
+def no_keys():
+    PressKey(W)
+    time.sleep(0.03)
+    ReleaseKey(A)
+    ReleaseKey(S)
+    ReleaseKey(D)

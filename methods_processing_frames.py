@@ -82,14 +82,14 @@ def region_of_interest(frame, vertices):
     return masked_frame
 
 
-def modify_frame_160x120gray(frame):
-    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    resized_frame = cv2.resize(gray_frame, (160, 120))
-    return resized_frame
+def make_gray_frame_custDimensions(frame, height, width):
+    resized_frame = cv2.resize(frame, (height, width))
+    gray_frame = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2GRAY)
+    return gray_frame
 
 
 def modify_frame_480x270gray(frame):
-    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    resized_frame = cv2.resize(gray_frame, (480, 270))
-    return resized_frame
+    resized_frame = cv2.resize(frame, (480, 270))
+    gray_frame = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2GRAY)
+    return gray_frame
 
