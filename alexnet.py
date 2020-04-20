@@ -35,7 +35,7 @@ def alexnet(width, height, lr, output=9):
     return model
 
 
-def alexnet2(width, height, lr, output=3):
+def alexnet2(width=120, height=160, lr=None, output=9):
     network = input_data(shape=[None, width, height, 1], name='input')
     network = conv_2d(network, 96, 11, strides=4, activation='relu')
     network = max_pool_2d(network, 3, strides=2)

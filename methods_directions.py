@@ -1,6 +1,5 @@
 from self_driving_car_with_python.direct_keys import PressKey, ReleaseKey, W, A, S, D
 import time
-import logging
 from statistics import mean
 
 t_time = 0.09
@@ -36,7 +35,7 @@ def go_straight():
     PressKey(W)
     ReleaseKey(A)
     ReleaseKey(D)
-    time.sleep(0.03)
+    time.sleep(0.2)
     ReleaseKey(W)
 
 
