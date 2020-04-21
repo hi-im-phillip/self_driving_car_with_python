@@ -41,7 +41,7 @@ def keys_to_output_AWD(keys):
 
 def keys_to_output_complex(keys):
     """
-    sentex
+    sentdex
     Convert keys to a ...multi-hot... array
      0  1  2  3  4   5   6   7    8
     [W, S, A, D, WA, WD, SA, SD, NOKEY] boolean values.

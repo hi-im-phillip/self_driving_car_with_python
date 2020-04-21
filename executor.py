@@ -13,7 +13,7 @@ def execute(choice):
             break
         elif choice == "run_model":
             print("Running model")
-            execute_model_new()
+            execute_run_model()
             break
         elif choice == "self_driver_cv":
             print("Running self driving driver cv")

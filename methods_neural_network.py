@@ -1,12 +1,11 @@
-import numpy as np
 import os
 from collections import Counter
 from random import shuffle
 from self_driving_car_with_python.methods_directions import *
 import logging
-from self_driving_car_with_python.alexnet import alexnet, alexnet2
-from self_driving_car_with_python.get_keys import key_check, keys_to_output_complex, w, a, s, d, wd, wa, sd, sa, nk
-from self_driving_car_with_python.methods_processing_frames import make_gray_frame_custDimensions
+from self_driving_car_with_python.alexnet import alexnet
+from self_driving_car_with_python.get_keys import key_check, keys_to_output_complex
+from self_driving_car_with_python.methods_processing_frames import make_gray_frame_custDimensions, pre_process_frame
 from self_driving_car_with_python.methods_capturing_frames import take_frame
 import time
 import pandas as pd
@@ -16,11 +15,12 @@ import tensorflow as tf
 
 SCREEN_WIDTH_160 = 160
 SCREEN_HEIGHT_120 = 120
-SCREEN_WIDTH_480 = 480
-SCREEN_HEIGHT_270 = 270
+GEORGE = "george_xception_5-0.1"
+COSMO = "cosmo_xception_10-0.2"
+
 LR = 1e-3
-EPOCHS = 10
-EPOCH_COUNT = 10
+EPOCHS = 5
+EPOCH_COUNT = 5
 MODEL_NAME = "pygta5-car-{}-{}-{}-epochs.model".format(LR, "alexnetv3", EPOCHS)
 LAST_MODEL = "pygta5-car-{}-{}-{}-epochs.model".format(LR, "alexnetv3", EPOCH_COUNT)
 NEW_MODEL = "cosmo-not_shuffled-{}-{}-{}-epochs.model".format(LR, "alexnetv7", EPOCHS)
@@ -28,8 +28,7 @@ LOAD_MODEL = False
 
 
 def check_existing_training_data():
-    old_starting_value = 68
-    starting_value = 96
+    starting_value = 126
     file_name = "training_data160120-{}.npy".format(starting_value)
     while True:
         if os.path.isfile(file_name):
@@ -44,7 +43,7 @@ def check_existing_training_data():
 
 def make_training_data(file_name):
     file_name = file_name
-    starting_value = 96
+    starting_value = 126
     training_data = []
     pause = False
     while True:
@@ -109,14 +108,14 @@ def train_xception_model():
     # XCEPTION MODEL
     xception_model = create_xception_model()
 
-    tensorboard = tf.keras.callbacks.TensorBoard(log_dir='logs/{}'.format("cosmo_xception_10-0.2"))
+    tensorboard = tf.keras.callbacks.TensorBoard(log_dir='logs/{}'.format("george_xception_5-0.1"))
 
     if LOAD_MODEL:
-        xception_model.load_weights("cosmo_xception_10-0.2")
-        print("model loaded: {}".format("cosmo_xception_10-0.2"))
+        xception_model.load_weights("george_xception_5-0.1")
+        print("model loaded: {}".format("george_xception_5-0.1"))
 
     for epoch in range(EPOCHS):
-        data_order = [i for i in range(15, 60)]
+        data_order = [i for i in range(1, 215)]
         shuffle(data_order)
         for j in data_order:
             training_data = np.load('training_data160120-{}.npy'.format(j), allow_pickle=True)
@@ -131,71 +130,34 @@ def train_xception_model():
                 rgb_train_x.append(rgb_image)
             rgb_train_x = np.array([i for i in rgb_train_x]).reshape(-1, 120, 160, 3) / 255.0
 
-    # x_train = np.array([i[0] for i in training_data]).reshape(-1, 120, 160, 1) / 255.0
+            y_train = [i[1] for i in training_data]
 
-    y_train = [i[1] for i in training_data]
+            xception_model.fit(np.array(rgb_train_x), np.array(y_train), batch_size=12, epochs=1, validation_split=0.1,
+                               callbacks=[tensorboard])
+            xception_model.save(filepath="george_xception_5-0.1")
 
-    xception_model.fit(np.array(rgb_train_x), np.array(y_train), batch_size=12, epochs=1, validation_split=0.1,
-                       callbacks=[tensorboard])
 
-
-def test_exception_model():
-    model = keras.models.load_model("cosmo_xception_10-0.2")
+def run_exception_model():
+    model = keras.models.load_model(GEORGE)
     paused = False
     for i in list(range(4))[::-1]:
         print(i + 1)
         time.sleep(1)
 
-    # w = [1, 0, 0, 0, 0, 0, 0, 0, 0] 0
-    # s = [0, 1, 0, 0, 0, 0, 0, 0, 0] 1
-    # a = [0, 0, 1, 0, 0, 0, 0, 0, 0] 2
-    # d = [0, 0, 0, 1, 0, 0, 0, 0, 0] 3
-    # wa = [0, 0, 0, 0, 1, 0, 0, 0, 0] 4
-    # wd = [0, 0, 0, 0, 0, 1, 0, 0, 0] 5
-    # sa = [0, 0, 0, 0, 0, 0, 1, 0, 0] 6
-    # sd = [0, 0, 0, 0, 0, 0, 0, 1, 0] 7
-    # nk = [0, 0, 0, 0, 0, 0, 0, 0, 1] 8
     # TODO tweak the prediction
     while True:
         if not paused:
             frame = take_frame()
             frame = make_gray_frame_custDimensions(frame, 160, 120)
             frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
+            # _, _, _, l1, l2 = pre_process_frame(frame) # TODO stay in lane whatever happens
             frame = frame.reshape(1, 120, 160, 3) / 255.0
             prediction = model.predict([frame])[0]
-            print(prediction)
-            #     w    s    a    d    wa   wd   sa  sd   nk
-            prediction = np.array(prediction) * np.array([1, 0.8, 1, 1, 1, 1, 0.8, 0.8, 1])
-            print(prediction)
-            if np.argmax(prediction) == np.argmax(w):
-                # if prediction[0] > 0.60:
-                go_straight()
-                print("straight")
-            elif np.argmax(prediction) == np.argmax(s):
-                # elif prediction[1] >
-                reverse()
-                print("reverse")
-            elif np.argmax(prediction) == np.argmax(a):
-                go_left()
-                print("left")
-            elif np.argmax(prediction) == np.argmax(d):
-                go_right()
-                print("right")
-            elif np.argmax(prediction) == np.argmax(wa):
-                forward_left()
-                print("forward_left")
-            elif np.argmax(prediction) == np.argmax(wd):
-                forward_right()
-                print("forward_right")
-            elif np.argmax(prediction) == np.argmax(sa):
-                reverse_left()
-                print("reverse_left")
-            elif np.argmax(prediction) == np.argmax(sd):
-                reverse_right()
-                print("reverse_right")
-            elif np.argmax(prediction) == np.argmax(nk):
-                no_keys()
-                print("no_keys")
+            # print(prediction)
+                                                   #     w    s    a    d    wa   wd   sa  sd   nk
+            prediction = np.array(prediction) * np.array([1, 1.3, 1, 1, 1, 1, 1, 1, 1])
+            # print(prediction)
+            make_direction_logic(prediction)
 
         keys = key_check()
         if "T" in keys:

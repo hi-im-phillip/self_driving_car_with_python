@@ -1,34 +1,13 @@
 from self_driving_car_with_python.direct_keys import PressKey, ReleaseKey, W, A, S, D
+from self_driving_car_with_python.get_keys import w, a, s, d, wd, wa, sd, sa, nk
+from self_driving_car_with_python.ProjectCarsAPI import get_current_car_speed
 import time
 from statistics import mean
+import numpy as np
 
 t_time = 0.09
 
-
-def straight():
-    PressKey(W)
-    ReleaseKey(A)
-    ReleaseKey(D)
-
-
-def left():
-    PressKey(W)
-    PressKey(A)
-    ReleaseKey(W)
-    ReleaseKey(D)
-    #ReleaseKey(A)
-    time.sleep(t_time)
-    ReleaseKey(A)
-
-
-def right():
-    PressKey(W)
-    PressKey(D)
-    ReleaseKey(W)
-    ReleaseKey(A)
-    #ReleaseKey(D)
-    time.sleep(t_time)
-    ReleaseKey(D)
+# TWEAKS FOR CV
 
 
 def go_straight():
@@ -115,12 +94,15 @@ def balance_car(l1, l2):
     if mean(l1[0::1]) >= 450:  # imbalance, both lines are on right side
         go_hard_left()
         print("imbalanced, turning hard left")
-    elif 400 >= mean(l2[0::1]) > 0:  # imbalance, both lines are on left side
+    elif 420 >= mean(l2[0::1]) > 0:  # imbalance, both lines are on left side
         go_hard_right()
         print("imbalanced, turning hard right")
 
 
 def steering_logic(steering_angle, l1, l2):
+    """
+    Steering logic for self_driving_cv
+    """
     balance_car(l1, l2)
 
     if steering_angle < 85:
@@ -160,31 +142,109 @@ def steering_logic(steering_angle, l1, l2):
         print("going straight")
         print(steering_angle)
 
+# TWEAKS FOR NN
+
+
+def make_direction_logic(prediction):
+    car_speed = get_current_car_speed()
+    print(car_speed)
+    if np.argmax(prediction) == np.argmax(w):
+        straight_v2()
+        print("straight")
+    elif np.argmax(prediction) == np.argmax(s):
+        if car_speed <= 5:
+            print("Speed was {} but said to reverse it".format(str(car_speed)))
+            straight_v2()
+        else:
+            reverse_v2()
+            print("reverse")
+    elif np.argmax(prediction) == np.argmax(a):
+        if car_speed > 35:
+            print("slowing down and left")
+            slowing_down()
+            left_v2()
+        else:
+            left_v2()
+            print("left")
+    elif np.argmax(prediction) == np.argmax(d):
+        if car_speed > 35:
+            print("slowing down and right")
+            slowing_down()
+            right_v2()
+        else:
+            right_v2()
+            print("right")
+    elif np.argmax(prediction) == np.argmax(wa):
+        forward_left_v2()
+        print("forward_left")
+    elif np.argmax(prediction) == np.argmax(wd):
+        forward_right_v2()
+        print("forward_right")
+    elif np.argmax(prediction) == np.argmax(sa):
+        reverse_left_v2()
+        print("reverse_left")
+    elif np.argmax(prediction) == np.argmax(sd):
+        reverse_right_v2()
+        print("reverse_right")
+    elif np.argmax(prediction) == np.argmax(nk):
+        no_keys()
+        print("no_keys")
+
+
+def straight():
+    PressKey(W)
+    ReleaseKey(A)
+    ReleaseKey(D)
+    ReleaseKey(S)
+    time.sleep(0.13)
+    # ReleaseKey(W)
+
+
+def left():
+    PressKey(A)
+    ReleaseKey(W)
+    ReleaseKey(D)
+    ReleaseKey(S)
+    time.sleep(0.06)
+    # ReleaseKey(A)
+
+
+def right():
+    PressKey(D)
+    ReleaseKey(W)
+    ReleaseKey(A)
+    ReleaseKey(S)
+    time.sleep(0.06)
+    # ReleaseKey(D)
+
 
 def reverse():
     PressKey(S)
-    time.sleep(0.03)
     ReleaseKey(A)
     ReleaseKey(W)
     ReleaseKey(D)
+    time.sleep(0.05)
+    ReleaseKey(S)
 
 
 def forward_left():
     PressKey(A)
     PressKey(W)
-    time.sleep(0.03)
+    time.sleep(0.02)
     ReleaseKey(D)
     ReleaseKey(S)
-    ReleaseKey(W)
+    # ReleaseKey(W)
+    # ReleaseKey(A)
 
 
 def forward_right():
     PressKey(D)
     PressKey(W)
-    time.sleep(0.03)
+    time.sleep(0.02)
     ReleaseKey(A)
     ReleaseKey(S)
     ReleaseKey(W)
+    ReleaseKey(D)
 
 
 def reverse_left():
@@ -193,6 +253,8 @@ def reverse_left():
     time.sleep(0.03)
     ReleaseKey(W)
     ReleaseKey(D)
+    ReleaseKey(S)
+    ReleaseKey(A)
 
 
 def reverse_right():
@@ -201,11 +263,88 @@ def reverse_right():
     time.sleep(0.03)
     ReleaseKey(W)
     ReleaseKey(A)
+    ReleaseKey(S)
+    ReleaseKey(D)
 
 
 def no_keys():
-    PressKey(W)
-    time.sleep(0.03)
     ReleaseKey(A)
     ReleaseKey(S)
     ReleaseKey(D)
+    ReleaseKey(W)
+
+
+def straight_v2():
+    PressKey(W)
+    ReleaseKey(A)
+    ReleaseKey(D)
+    ReleaseKey(S)
+
+
+def left_v2():
+    PressKey(A)
+    ReleaseKey(W)
+    ReleaseKey(D)
+    ReleaseKey(S)
+    # time.sleep(0.2)
+    # ReleaseKey(A)
+
+
+def right_v2():
+    PressKey(D)
+    ReleaseKey(W)
+    ReleaseKey(A)
+    ReleaseKey(S)
+    # time.sleep(0.2)
+    # ReleaseKey(D)
+
+
+def reverse_v2():
+    PressKey(S)
+    ReleaseKey(A)
+    ReleaseKey(W)
+    ReleaseKey(D)
+
+
+def forward_left_v2():
+    PressKey(W)
+    PressKey(A)
+    ReleaseKey(D)
+    ReleaseKey(S)
+    time.sleep(0.2)
+    ReleaseKey(A)
+    # ReleaseKey(W)
+
+
+def forward_right_v2():
+    PressKey(W)
+    PressKey(D)
+    ReleaseKey(A)
+    ReleaseKey(S)
+    time.sleep(0.2)
+    ReleaseKey(D)
+    # ReleaseKey(W)
+
+
+def reverse_left_v2():
+    PressKey(S)
+    PressKey(A)
+    ReleaseKey(W)
+    ReleaseKey(D)
+
+
+def reverse_right_v2():
+    PressKey(S)
+    PressKey(D)
+    ReleaseKey(W)
+    ReleaseKey(A)
+
+
+def slowing_down():
+    PressKey(S)
+    ReleaseKey(A)
+    ReleaseKey(W)
+    ReleaseKey(D)
+    time.sleep(0.6)
+    ReleaseKey(S)
+

@@ -15,6 +15,8 @@ def pre_process_frame(frame):
     blur the given image and apply Canny effect
     :return: Return it with made changes
     """
+    l1 = [0, 0, 0, 0]
+    l2 = [0, 0, 0, 0]
     vertices_800x600 = np.array([[370, 360], [200, 465], [5, 465], [100, 350], [350, 260], [450, 260], [700, 350], [800, 465], [600, 465], [430, 360]], np.int32)
     vertices_1024x768 = np.array([[450, 460], [200, 565], [5, 565], [100, 450], [450, 260], [550, 260], [924, 450], [1024, 565], [800, 565], [550, 460]], np.int32)
     steering_angle = 90
@@ -58,9 +60,11 @@ def pre_process_frame(frame):
                 except Exception as e:
                     logging.error("Couldn't draw lines with given input")
                     print(str(e))
+                    pass
     except Exception as e:
         logging.error("Didn't get lines or line")
         print(str(e))
+        pass
 
     return frame_with_roi, original_frame, steering_angle, l1, l2
 

@@ -1,7 +1,7 @@
 from self_driving_car_with_python.methods_capturing_frames import take_frame
 from self_driving_car_with_python.methods_directions import steering_logic
 from self_driving_car_with_python.methods_processing_frames import pre_process_frame
-from self_driving_car_with_python.methods_neural_network import test_exception_model, train_xception_model, check_existing_training_data, make_training_data
+from self_driving_car_with_python.methods_neural_network import run_exception_model, train_xception_model, check_existing_training_data, make_training_data
 from self_driving_car_with_python.methods_helper import timer
 import numpy as np
 import warnings
@@ -21,8 +21,8 @@ def execute_to_train_data():
     train_xception_model()
 
 
-def execute_model_new():
-    test_exception_model()
+def execute_run_model():
+    run_exception_model()
 
 
 def execute_self_driving_cv():
