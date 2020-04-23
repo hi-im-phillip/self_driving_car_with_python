@@ -27,7 +27,10 @@ import time
 # Project Cars API
 # Tracking the game speed in real time
 
-game = carseour.live()
+try:
+    game = carseour.live()
+except carseour.InvalidSharedMemoryVersionException as e:
+    pass
 
 
 def show_speed():
@@ -38,3 +41,11 @@ def show_speed():
 
 def get_current_car_speed():
     return game.mSpeed
+
+
+def get_steering_angle():  # From Left -1 to Right 1
+    return game.mSteering
+
+
+def get_current_time_game():
+    return game.mCurrentTime

@@ -26,7 +26,7 @@ def execute_run_model():
 
 
 def execute_self_driving_cv():
-    timer()
+    timer(3)
     while True:
         frame = take_frame()
         processed_frame, original_frame, steering_angle, l1, l2 = pre_process_frame(frame=frame)  # left, right
