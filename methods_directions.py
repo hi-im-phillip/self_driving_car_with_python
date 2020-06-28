@@ -154,64 +154,49 @@ def make_direction_logic(prediction):
         straight_v2()
         # show_turn_and_speed("Forward", car_speed, show_speed=False)
     elif np.argmax(prediction) == np.argmax(s):  # Reverse
-        if car_speed <= 10.0:
+        if car_speed <= 15.0:
+            straight_v2()
+            # time.sleep(1)
             print("Speed was too low for reverse {}".format(str(car_speed)))
-            no_keys()
-            PressKey(W)
-            time.sleep(1.5)
         else:
             reverse_v2()
             # show_turn_and_speed("Reverse", car_speed, show_speed=False)
     elif np.argmax(prediction) == np.argmax(a):  # Left
-        if car_speed >= 35.0:
-            print("slowing down and left")
-            slowing_down_left()
-        elif car_speed <= 0.5 and get_current_time_game() > 10:  # If it's start of the race and needs to take left
+        if car_speed <= 0.5 and get_current_time_game() > 10:  # If it's start of the race and needs to take left
             unstuck()
+            print("left unstuck")
         else:
-            left_v2(steering_angle)
-            show_turn_and_speed("Left", car_speed, show_speed=False)
+            left_v2(steering_angle, car_speed)
+            show_turn_and_speed("Left", car_speed, show_speed=True)
     elif np.argmax(prediction) == np.argmax(d):  # Right
-        if car_speed >= 35.0:
-            print("slowing down and right")
-            slowing_down_right()
-        elif car_speed <= 0.5 and get_current_time_game() > 10:
-            unstuck()
-        else:
-            right_v2(steering_angle)
-            show_turn_and_speed("Right", car_speed, show_speed=False)
-    elif np.argmax(prediction) == np.argmax(wa):  # Forward Left
-        # if car_speed >= 35:
-        #     forward_left()
-        #     show_turn_and_speed("Forward Left", car_speed)
-        # else:
-        # forward_left_v2(0.2)
-        # show_turn_and_speed("Forward Left_v2", car_speed)
-        forward_left(steering_angle)
-        show_turn_and_speed("Forward Left", car_speed, show_speed=False)
-    elif np.argmax(prediction) == np.argmax(wd):  # Forward Right
-        # if car_speed >= 35:
-        #     show_turn_and_speed("Forward Right", car_speed)
-        #     forward_right()
-        # else:
-        # forward_right_v2(0.2)
-        # show_turn_and_speed("Forward Right_v2", car_speed)
-        forward_right(steering_angle)
-        show_turn_and_speed("Forward Right", car_speed, show_speed=False)
-    elif np.argmax(prediction) == np.argmax(sa):  # Reverse Left
-        reverse_left()
-        # show_turn_and_speed("Reverse Left", car_speed, show_speed=False)
-    elif np.argmax(prediction) == np.argmax(sd):  # Reverse Right
-        reverse_right()
-        # show_turn_and_speed("Reverse Right", car_speed, show_speed=False)
-    elif np.argmax(prediction) == np.argmax(nk):  # No Keys
-        if randrange(0, 1) == 0:
-            no_keys()
-        else:
-            PressKey(W)
-        # show_turn_and_speed("No Keys", car_speed, show_speed=False)
         if car_speed <= 0.5 and get_current_time_game() > 10:
             unstuck()
+            print("right unstuck")
+        else:
+            right_v2(steering_angle, car_speed)
+            show_turn_and_speed("Right", car_speed, show_speed=True)
+    elif np.argmax(prediction) == np.argmax(wa):  # Forward Left
+        forward_left(steering_angle, car_speed)
+        # show_turn_and_speed("Forward Left", car_speed, show_speed=False)
+    elif np.argmax(prediction) == np.argmax(wd):  # Forward Right
+        forward_right(steering_angle, car_speed)
+        # show_turn_and_speed("Forward Right", car_speed, show_speed=False)
+    elif np.argmax(prediction) == np.argmax(sa):  # Reverse Left
+        reverse_left_v2()
+        # show_turn_and_speed("Reverse Left", car_speed, show_speed=False)
+    elif np.argmax(prediction) == np.argmax(sd):  # Reverse Right
+        reverse_right_v2()
+        # show_turn_and_speed("Reverse Right", car_speed, show_speed=False)
+    elif np.argmax(prediction) == np.argmax(nk):  # No Keys
+        random_num = randrange(0, 1)
+        if random_num == 0:
+            no_keys()
+        elif random_num == 1:
+            PressKey(W)
+        if car_speed <= 0.5 and get_current_time_game() > 10:
+            unstuck()
+            print("right unstuck")
+        # show_turn_and_speed("No Keys", car_speed, show_speed=False)
 
 
 def straight():
@@ -250,26 +235,48 @@ def reverse():
     ReleaseKey(S)
 
 
-def forward_left(steering_angle):
+def forward_left(steering_angle, car_speed):
     PressKey(A)
     PressKey(W)
     ReleaseKey(D)
     ReleaseKey(S)
-    if steering_angle < -0.22 or steering_angle > 0.22:
+    if car_speed > 30 and car_speed < 58:
+        PressKey(S)
+        ReleaseKey(S)
+        if steering_angle < -0.12 or steering_angle > 0.12:
+            ReleaseKey(W)
+            ReleaseKey(A)
+            print("Angle was less -0.12 or more 0.12")
+    elif car_speed > 58:
+        if steering_angle < -0.08 or steering_angle > 0.08:
+            ReleaseKey(A)
+            print("Angle was less -0.08 or more 0.08")
+    elif steering_angle < -0.16 or steering_angle > 0.16:
         ReleaseKey(W)
         ReleaseKey(A)
-        print(get_steering_angle())
+        print("Angle was less -0.16 or more 0.16")
 
 
-def forward_right(steering_angle):
+def forward_right(steering_angle, car_speed):
     PressKey(D)
     PressKey(W)
     ReleaseKey(A)
     ReleaseKey(S)
-    if steering_angle < -0.22 or steering_angle > 0.22:
+    if car_speed > 30 and car_speed < 58:
+        PressKey(S)
+        ReleaseKey(S)
+        if steering_angle < -0.12 or steering_angle > 0.12:
+            ReleaseKey(W)
+            ReleaseKey(D)
+            print("Angle was less -0.12 or more 0.12")
+    elif car_speed > 58:
+        if steering_angle < -0.08 or steering_angle > 0.08:
+            ReleaseKey(D)
+            print("Angle was less -0.08 or more 0.08")
+    elif steering_angle < -0.16 or steering_angle > 0.16:
         ReleaseKey(W)
         ReleaseKey(D)
-        print(get_steering_angle())
+        print("Angle was less -0.16 or more 0.16")
 
 
 def reverse_left():
@@ -306,28 +313,46 @@ def straight_v2():
     ReleaseKey(S)
 
 
-def left_v2(steering_angle=None):
+def left_v2(steering_angle=None, car_speed=None):
     PressKey(A)
     ReleaseKey(D)
     ReleaseKey(W)
     ReleaseKey(S)
-    if steering_angle < -0.45 or steering_angle > 0.45:
+    if car_speed >= 20.0:
+        PressKey(S)
+        if steering_angle < -0.27 or steering_angle > 0.27:
+            ReleaseKey(A)
+        print("slowing down and left")
+    elif car_speed > 5 and car_speed < 15:
+        if steering_angle < -0.40 or steering_angle > 0.40:
+            ReleaseKey(A)
+            PressKey(W)
+            # ReleaseKey(W)
+            print("Angle was more 0.40 or less -0.40")
+    elif steering_angle < -0.45 or steering_angle > 0.45:
         ReleaseKey(A)
-        print(get_steering_angle())
-    # time.sleep(0.2)
-    # ReleaseKey(A)
+        print("Angle was more 0.45 or less -0.45")
 
 
-def right_v2(steering_angle=None):
+def right_v2(steering_angle=None, car_speed=None):
     PressKey(D)
     ReleaseKey(A)
     ReleaseKey(W)
     ReleaseKey(S)
-    if steering_angle < -0.45 or steering_angle > 0.45:
+    if car_speed >= 20.0:
+        PressKey(S)
+        if steering_angle < -0.30 or steering_angle > 0.30:
+            ReleaseKey(D)
+        print("slowing down and right")
+    elif car_speed > 5 and car_speed < 17:
+        if steering_angle < -0.35 or steering_angle > 0.35:
+            ReleaseKey(D)
+            PressKey(W)
+            # ReleaseKey(W)
+            print("Angle was more 0.40 or less -0.40")
+    elif steering_angle < -0.40 or steering_angle > 0.40:
         ReleaseKey(D)
-        print(get_steering_angle())
-    # time.sleep(0.2)
-    # ReleaseKey(D)
+        print("Angle was more 0.45 or less -0.45")
 
 
 def reverse_v2():
