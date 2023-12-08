@@ -93,10 +93,7 @@ Za rješavanje takve problematike bi bila potrebna implementacija integracijske 
 
 <br>
 
-<video width="640" height="360" controls>
-  <source src="etc/test_voznja.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+![Alt Text](etc/test_voznja.gif)
 
 ## Dokumentacija:
 
